@@ -9,19 +9,18 @@ class Login extends Component {
     this.state = {
       loggedIn: false,
       userId: '',
-      name: '',
-      access: ''
+      access: '',
+      email: ''
     };
   }
 
   responseFacebook = response =>  {
-    //Probably save info into DynamoDB here
     this.setState({
       loggedIn: true,
       userId: response.id,
-      name: response.name,
       //Dangerous operation, but for prototyping...
-      access: response.accessToken
+      access: response.accessToken,
+      email: response.email
     })
     console.log(response);
   } 
@@ -30,7 +29,7 @@ class Login extends Component {
     let fbContent;
 
     if(this.state.loggedIn) {
-      fbContent = <Scheduler access={this.state.access}/>
+      fbContent = <Scheduler access={this.state.access} userId={this.state.userId} email={this.state.email}/>
     } else  {
       fbContent = (<FacebookLogin
         appId = {FBdetails.appID}

@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.329.0",
+    "axios": "^0.18.0",
     "fb": "^2.0.0",
     "react": "^16.5.2",
     "react-datetime-picker": "^1.6.1",
