@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import DateTimePicker from 'react-datetime-picker';
 import FB from 'fb';
 import axios from 'axios';
+import S3FileUpload from 'react-s3';
+import * as awsDetails from '../const/aws';
 
 class Scheduler extends Component {
   constructor(props) {
@@ -11,11 +13,13 @@ class Scheduler extends Component {
       date: new Date(),
       dateInSec: null,
       pages: [],
-      currPage: {id: '', name: '', access: ''}
+      currPage: {id: '', name: '', access: ''},
+      photo: null 
     };
     this.handleText = this.handleText.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handlePageSelect = this.handlePageSelect.bind(this);
+    this.setPhoto = this.setPhoto.bind(this);
   }
 
   componentDidMount() {
@@ -29,9 +33,13 @@ class Scheduler extends Component {
               access: page.access_token
           }
       });
-    this.setState({ pages: data});
-    console.log(data);
-  });
+      this.setState({ pages: data});
+      console.log(data);
+    });
+  }
+
+  setPhoto(e)  {
+    this.setState({ photo: e.target.files[0]})
   }
 
   handleText(e) {
@@ -50,7 +58,6 @@ class Scheduler extends Component {
 
   handleDate = date => {
     if(this.validateDate(date))  {
-      //Get time in UTC
       var dateInSec = this.getDateInSeconds(date)
       this.setState({ dateInSec: dateInSec })
     }
@@ -72,27 +79,46 @@ class Scheduler extends Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    if(this.state.text === '' || this.state.currPage === null)  {
-      console.log("Please complete the form")
+    if(this.state.text === '' 
+    || this.state.currPage === {id: '', name: '', access: ''} 
+    || this.state.dateInSec === null)  {
+      console.log("Please complete the form with valid values")
+      return;
     }
 
-    const body = {
+    let body = {
       fbid: this.props.userId,
       access: this.props.access,
       email: this.props.email,
       pageat: this.state.currPage.access,
       pageid: this.state.currPage.id,
       text: this.state.text,
-      time: this.state.dateInSec
+      time: this.state.dateInSec,
     }
 
-    console.log(body)
+    if(this.state.photo !== null) {
+      S3FileUpload.uploadFile(this.state.photo, awsDetails.config)
+      .then( (res) => {
+          body = Object.assign(body, {
+            url: res.location,
+            type: "photo"
+        }, body);
+        this.submitToDB(body)
+      })
+      .catch( (err) =>  {
+        console.log(err);
+      })
+    } else {
+      this.submitToDB(body)
+    }
+  }
 
+  submitToDB(body)  {
     axios.post('https://m38pxc2and.execute-api.us-east-1.amazonaws.com/dev/FBRequestPost', body, {
-        headers: {
-            'Accept': '*/*',
-            'Content-Type': 'application/json',
-        }
+      headers: {
+          'Accept': '*/*',
+          'Content-Type': 'application/json',
+      }
     })
     .then(res => {
       console.log(res);
@@ -102,7 +128,6 @@ class Scheduler extends Component {
       console.log(error.response);
       console.log(error)
     })
-
   }
 
   render() {
@@ -132,6 +157,7 @@ class Scheduler extends Component {
             })} 
           </select>
           <DateTimePicker onChange={this.handleDate} value={this.state.date}/>
+          <input type="file" onChange={this.setPhoto}/>
           <input type="submit" value="Submit" />
         </form>  
       </div>
