@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import FacebookLogin from 'react-facebook-login';
 import * as FBdetails from '../const/fb';
 import Scheduler from './Scheduler';
+import { Navbar} from 'react-bootstrap';
 
 class Login extends Component {
   constructor(props) {
@@ -41,6 +42,13 @@ class Login extends Component {
 
     return (
       <div>
+        <Navbar inverse>
+              <Navbar.Header>
+                  <Navbar.Brand>
+                      <a href="#">FB Scheduler</a>
+                  </Navbar.Brand>
+              </Navbar.Header>
+          </Navbar>
         {fbContent}
       </div>
     );

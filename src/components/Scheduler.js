@@ -4,6 +4,9 @@ import FB from 'fb';
 import axios from 'axios';
 import S3FileUpload from 'react-s3';
 import * as awsDetails from '../const/aws';
+import {ControlLabel, FormControl, Button, FormGroup, Grid,
+Col } from 'react-bootstrap';
+import Posts from '../components/Posts';
 
 class Scheduler extends Component {
   constructor(props) {
@@ -88,7 +91,6 @@ class Scheduler extends Component {
 
     let body = {
       fbid: this.props.userId,
-      access: this.props.access,
       email: this.props.email,
       pageat: this.state.currPage.access,
       pageid: this.state.currPage.id,
@@ -122,7 +124,8 @@ class Scheduler extends Component {
     })
     .then(res => {
       console.log(res);
-      console.log(res.body);
+      alert('Successfully scheduled.')
+      window.location.reload();
     })
     .catch((error) => {
       console.log(error.response);
@@ -133,33 +136,49 @@ class Scheduler extends Component {
   render() {
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Message:
-            <textarea 
-              type="text" 
-              value={this.state.value} 
-              onChange={this.handleText}
-              rows="4" />
-          </label>
-          <select
-            value={this.state.currPage.id}
-            onChange={this.handlePageSelect}>
-            <option value={''}>Select Page</option>
-            {this.state.pages.map(page => {
-                return (
-                    <option
-                        value={page.id}
-                        key={page.id}>
-                        {page.name}
-                    </option>
-                );
-            })} 
-          </select>
-          <DateTimePicker onChange={this.handleDate} value={this.state.date}/>
-          <input type="file" onChange={this.setPhoto}/>
-          <input type="submit" value="Submit" />
-        </form>  
+        <Grid>
+            <Col xs={12} md={8} xsOffset={2}>
+            <form onSubmit={this.handleSubmit}>
+              <FormGroup>
+                <ControlLabel>Please enter post for schedule.</ControlLabel>
+                <FormGroup>
+                  <FormControl
+                    componentClass="textarea"
+                    value={this.state.value}
+                    placeholder="Enter text"
+                    onChange={this.handleText}
+                  />
+                </FormGroup>
+                <FormGroup>
+                  <FormControl componentClass="select" placeholder="select page"
+                  onChange={this.handlePageSelect}>
+                  {this.state.pages.map(page => {
+                        return (
+                            <option
+                                value={page.id}
+                                key={page.id}>
+                                {page.name}
+                            </option>
+                        );
+                    })} 
+                  </FormControl>
+                </FormGroup>
+                <FormGroup>
+                  <DateTimePicker onChange={this.handleDate} value={this.state.date}/>
+                </FormGroup>
+                <FormGroup>
+                  <input type="file" 
+                  onChange={this.setPhoto}
+                  accept="image/png, image/jpeg" />
+                </FormGroup>
+                <FormGroup>
+                  <Button type="submit">Submit</Button> 
+                </FormGroup>
+          </FormGroup>
+        </form>
+            </Col>
+         </Grid>
+         <Posts id={this.props.userId}/> 
       </div>
     );
   }
